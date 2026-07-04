@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { COLORS, DEPTHS, GAME_WIDTH, SPRING_VELOCITY } from "../config";
+import { COLORS, DEPTHS, GAME_WIDTH, GAME_HEIGHT, TILE_SIZE, SPRING_VELOCITY } from "../config";
 import { LEVELS } from "../levels/levels";
 import { parseLevel } from "../utils/levelParser";
 import type { ParsedLevel } from "../utils/levelParser";
@@ -23,6 +23,7 @@ export class GameScene extends Phaser.Scene {
   private keyIcon!: Phaser.GameObjects.Image;
   private deathPitY = 0;
   private levelEnded = false;
+  private oceanLayer!: Phaser.GameObjects.TileSprite;
 
   constructor() {
     super("Game");
@@ -39,6 +40,7 @@ export class GameScene extends Phaser.Scene {
 
     const parsed = parseLevel(this, level);
     this.parsed = parsed;
+    this.addBackground(parsed.worldWidth, parsed.worldHeight);
     this.addClouds(parsed.worldWidth);
 
     this.physics.world.setBounds(0, 0, parsed.worldWidth, parsed.worldHeight);
@@ -141,7 +143,7 @@ export class GameScene extends Phaser.Scene {
     this.setupHud(level.id);
   }
 
-  update(): void {
+  update(_time: number, delta: number): void {
     if (this.levelEnded) return;
 
     // Los overlaps de fisica de este frame (que llenan nearbyPickup/nearbySwitch)
@@ -159,6 +161,8 @@ export class GameScene extends Phaser.Scene {
     if (this.player.y > this.deathPitY) {
       this.player.die();
     }
+
+    this.oceanLayer.tilePositionX += delta * 0.02;
 
     this.updateHud();
   }
@@ -195,18 +199,60 @@ export class GameScene extends Phaser.Scene {
     this.keyIcon.setAlpha(this.player.hasKey ? 1 : 0.3);
   }
 
+  private addBackground(worldWidth: number, worldHeight: number): void {
+    // El piso siempre queda a dos filas del borde inferior de la grilla
+    // (ver levels.ts), asi que este calculo alinea el mar justo donde
+    // termina el piso en los 5 niveles sin depender de su altura exacta.
+    const floorTopY = worldHeight - TILE_SIZE * 2;
+
+    this.add
+      .image(0, 0, "bg-sky")
+      .setOrigin(0, 0)
+      .setDisplaySize(worldWidth, Math.max(GAME_HEIGHT, worldHeight) + 200)
+      .setScrollFactor(0.1)
+      .setDepth(DEPTHS.bgSky);
+
+    const mountainsHeight = GAME_HEIGHT * 0.36;
+    this.add
+      .image(0, floorTopY - mountainsHeight, "bg-mountains")
+      .setOrigin(0, 0)
+      .setDisplaySize(worldWidth, mountainsHeight)
+      .setScrollFactor(0.25)
+      .setDepth(DEPTHS.bgMountains);
+
+    // 550 coincide con el alto nativo de bg-ocean.png (ver generate-sprites.mjs)
+    // para que la textura llene el alto exacto sin repetirse verticalmente,
+    // solo horizontalmente (y con eso evitamos una costura vertical visible).
+    this.oceanLayer = this.add
+      .tileSprite(0, floorTopY, worldWidth, 550, "bg-ocean")
+      .setOrigin(0, 0)
+      .setScrollFactor(0.5)
+      .setDepth(DEPTHS.bgOcean);
+  }
+
   private addClouds(worldWidth: number): void {
+    const variants = ["cloud", "cloud-2", "cloud-3"];
     const count = Math.max(4, Math.floor(worldWidth / 400));
     for (let i = 0; i < count; i++) {
-      this.add
+      const cloud = this.add
         .image(
           Phaser.Math.Between(0, worldWidth),
           Phaser.Math.Between(30, 160),
-          "cloud",
+          Phaser.Utils.Array.GetRandom(variants),
         )
         .setScrollFactor(0.3)
         .setDepth(DEPTHS.background)
         .setAlpha(0.8);
+
+      const drift = Phaser.Math.Between(60, 160);
+      this.tweens.add({
+        targets: cloud,
+        x: cloud.x + drift,
+        duration: Phaser.Math.Between(9000, 16000),
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+      });
     }
   }
 

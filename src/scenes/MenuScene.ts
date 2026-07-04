@@ -11,34 +11,46 @@ export class MenuScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(COLORS.sky);
 
     this.add
-      .text(GAME_WIDTH / 2, 120, "Isla del Tesoro", {
-        fontSize: "56px",
-        color: "#ffffff",
-        fontStyle: "bold",
-      })
-      .setOrigin(0.5)
-      .setShadow(2, 4, "#00000055", 4);
+      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2, "menu-bg")
+      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
 
     this.add
-      .text(GAME_WIDTH / 2, 180, "Elige un nivel", {
-        fontSize: "24px",
-        color: "#ffffffcc",
+      .image(GAME_WIDTH / 2, 135, "title-banner")
+      .setDisplaySize(640, 217);
+
+    this.add
+      .text(GAME_WIDTH / 2, 100, "Isla del Tesoro", {
+        fontSize: "64px",
+        color: "#ffffff",
+        fontStyle: "bold",
+        stroke: "#2c3e50",
+        strokeThickness: 8,
+      })
+      .setOrigin(0.5)
+      .setShadow(2, 4, "#00000066", 6);
+
+    this.add
+      .text(GAME_WIDTH / 2, 168, "Elige un nivel", {
+        fontSize: "26px",
+        color: "#ffffff",
+        stroke: "#2c3e50",
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
     const cols = 5;
-    const spacing = 160;
+    const spacing = 170;
     const startX = GAME_WIDTH / 2 - ((cols - 1) * spacing) / 2;
-    const y = GAME_HEIGHT / 2;
+    const y = GAME_HEIGHT / 2 + 40;
 
     LEVELS.forEach((level, index) => {
       const x = startX + index * spacing;
-      const button = this.add
-        .rectangle(x, y, 120, 120, 0xffffff, 0.9)
-        .setStrokeStyle(4, 0x2c3e50)
+
+      const node = this.add
+        .image(x, y, "level-node")
         .setInteractive({ useHandCursor: true });
 
-      this.add
+      const label = this.add
         .text(x, y, String(level.id), {
           fontSize: "48px",
           color: "#2c3e50",
@@ -46,18 +58,41 @@ export class MenuScene extends Phaser.Scene {
         })
         .setOrigin(0.5);
 
-      button.on("pointerover", () => button.setFillStyle(0xffe66d, 1));
-      button.on("pointerout", () => button.setFillStyle(0xffffff, 0.9));
-      button.on("pointerdown", () => {
+      node.on("pointerover", () => {
+        this.tweens.add({
+          targets: [node, label],
+          scale: 1.12,
+          duration: 160,
+          ease: "Back.easeOut",
+        });
+      });
+      node.on("pointerout", () => {
+        this.tweens.add({
+          targets: [node, label],
+          scale: 1,
+          duration: 160,
+          ease: "Sine.easeOut",
+        });
+      });
+      node.on("pointerdown", () => {
         this.scene.start("Game", { levelIndex: index });
       });
     });
 
     this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT - 60, "Flechas/WASD: mover y saltar   ESPACIO: agarrar/lanzar   E: activar", {
-        fontSize: "16px",
-        color: "#ffffffcc",
-      })
+      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 40, GAME_WIDTH, 52, 0x1a1a2e, 0.45)
+      .setOrigin(0.5);
+
+    this.add
+      .text(
+        GAME_WIDTH / 2,
+        GAME_HEIGHT - 40,
+        "Flechas/WASD: mover y saltar   ESPACIO: agarrar/lanzar   E: activar",
+        {
+          fontSize: "16px",
+          color: "#ffffffee",
+        },
+      )
       .setOrigin(0.5);
   }
 }

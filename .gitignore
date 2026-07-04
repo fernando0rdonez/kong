@@ -25,3 +25,8 @@ dist-ssr
 
 # Claude Code local state
 .claude/
+
+# Environment variables (contains secrets, never commit)
+.env
+.env.*
+!.env.example

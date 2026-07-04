@@ -4,25 +4,12 @@ export const TILE_SIZE = 64;
 
 export const COLORS = {
   sky: 0x6ec6ff,
-  platform: 0x8d5b3b,
-  platformTop: 0x6ab04c,
-  player: 0xff6b6b,
-  playerAccent: 0xffe66d,
-  enemy: 0x8e44ad,
-  barrel: 0xd35400,
-  key: 0xf1c40f,
-  door: 0x27ae60,
-  doorLocked: 0x7f8c8d,
-  switchOff: 0xc0392b,
-  switchOn: 0x2ecc71,
-  movingPlatform: 0x3498db,
-  timedPlatformOn: 0x9b59b6,
-  timedPlatformOff: 0x2c3e50,
-  spring: 0xe67e22,
-  hud: 0xffffff,
 } as const;
 
 export const DEPTHS = {
+  bgSky: -40,
+  bgMountains: -30,
+  bgOcean: -20,
   background: 0,
   platforms: 10,
   interactive: 15,
