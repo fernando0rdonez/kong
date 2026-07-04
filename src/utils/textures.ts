@@ -151,6 +151,27 @@ export function generateTextures(scene: Phaser.Scene, tileSize: number): void {
   g.generateTexture("hint-bubble", 48, 48);
   g.clear();
 
+  // Boton de "volver al inicio" (icono de casa)
+  const btnSize = 48;
+  g.fillStyle(0xffffff, 0.95);
+  g.fillRoundedRect(0, 0, btnSize, btnSize, 10);
+  g.lineStyle(3, 0x2c3e50, 1);
+  g.strokeRoundedRect(1.5, 1.5, btnSize - 3, btnSize - 3, 10);
+  g.fillStyle(0x2c3e50, 1);
+  g.fillTriangle(
+    btnSize * 0.5,
+    btnSize * 0.2,
+    btnSize * 0.22,
+    btnSize * 0.48,
+    btnSize * 0.78,
+    btnSize * 0.48,
+  );
+  g.fillRect(btnSize * 0.28, btnSize * 0.48, btnSize * 0.44, btnSize * 0.28);
+  g.fillStyle(0xffffff, 1);
+  g.fillRect(btnSize * 0.44, btnSize * 0.58, btnSize * 0.12, btnSize * 0.18);
+  g.generateTexture("btn-home", btnSize, btnSize);
+  g.clear();
+
   g.destroy();
 }
 

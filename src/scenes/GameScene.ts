@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { COLORS, DEPTHS, SPRING_VELOCITY } from "../config";
+import { COLORS, DEPTHS, GAME_WIDTH, SPRING_VELOCITY } from "../config";
 import { LEVELS } from "../levels/levels";
 import { parseLevel } from "../utils/levelParser";
 import type { ParsedLevel } from "../utils/levelParser";
@@ -180,6 +180,15 @@ export class GameScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(DEPTHS.hud)
       .setShadow(1, 2, "#00000088", 2);
+
+    const homeButton = this.add
+      .image(GAME_WIDTH - 40, 30, "btn-home")
+      .setScrollFactor(0)
+      .setDepth(DEPTHS.hud)
+      .setInteractive({ useHandCursor: true });
+    homeButton.on("pointerover", () => homeButton.setScale(1.1));
+    homeButton.on("pointerout", () => homeButton.setScale(1));
+    homeButton.on("pointerdown", () => this.scene.start("Menu"));
   }
 
   private updateHud(): void {

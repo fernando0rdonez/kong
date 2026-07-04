@@ -23,6 +23,7 @@ export class Pickup extends Phaser.Physics.Arcade.Sprite {
   }
 
   isSlowingDown(): boolean {
+    if (!this.active || !this.body) return false;
     const body = this.body as Phaser.Physics.Arcade.Body;
     return this.state === "thrown" && Math.abs(body.velocity.x) < 15;
   }
