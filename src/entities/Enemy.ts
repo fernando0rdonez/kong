@@ -8,7 +8,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private defeated = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number, tileSize: number) {
-    super(scene, x, y, "enemy");
+    super(scene, x, y, "enemy-walk", 0);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -20,6 +20,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     this.minX = x - ENEMY_PATROL_RANGE * tileSize;
     this.maxX = x + ENEMY_PATROL_RANGE * tileSize;
+
+    this.play("enemy-walk");
   }
 
   update(): void {

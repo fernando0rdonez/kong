@@ -91,32 +91,51 @@ y la puerta se veía chica y flotando sobre el piso.
       generar con bordes izquierdo/derecho forzados a hacer match (o usar
       un degradé sin textura direccional).
 
-## Fase 6 — Animación de caminar/saltar (pendiente)
-Hoy el jugador y el enemigo son una sola imagen estática: al moverse
-"deslizan" en vez de caminar, y saltar no se nota en el sprite.
+## Fase 6 — Animación de caminar/saltar + puerta + personajes más grandes
+Antes el jugador y el enemigo eran una sola imagen estática (deslizaban en
+vez de caminar) y la puerta cambiaba de textura instantáneamente al
+desbloquear.
 
-- [ ] Generar hojas de sprites (grid de frames) para `player` con al menos:
-      2-4 frames de ciclo de caminata + 1 frame de salto/aire. Mismo enfoque
-      para `enemy` (ciclo de caminata simple).
-- [ ] Riesgo conocido: pedirle a `gpt-image-1.5` un "sprite sheet" en una
-      sola imagen no garantiza frames consistentes (mismo tamaño/pose base/
-      color) entre sí — es una limitación real de generar frames por
-      separado o en grilla con un modelo de imágenes genérico. Probar
-      primero con un prompt que pida explícitamente una grilla prolija
-      (ej. "4 equally spaced frames in a horizontal row, consistent
-      character design and scale across all frames") y evaluar si la
-      consistencia alcanza; si no, considerar generar un solo frame base y
-      derivar los demás con transformaciones simples (flip, rotación leve
-      de piernas recortada a mano) o directamente animar por código
-      (bobbing/squash-stretch) como fallback sin arte nuevo.
-- [ ] Cortar la hoja resultante en frames individuales con `sharp` (grid
-      conocido de antemano) y cargarla como spritesheet en `BootScene`
-      (`this.load.spritesheet` en vez de `this.load.image` para esas keys).
-- [ ] Definir animaciones Phaser (`this.anims.create`) para walk/idle/jump
-      en `Player.ts` (y walk en `Enemy.ts`), y disparar `play()` según
-      estado (quieto/caminando/en el aire) en el `update()` de cada uno.
-- [ ] Verificar que los tamaños de frame no rompan la física (los `body.setSize`
-      actuales asumen las dimensiones de la imagen estática actual).
+- [x] `player-walk`/`enemy-walk`: hojas de sprites 2x2 (4 frames) generadas
+      con `gpt-image-1.5` en quality `medium` (se subió de `low` solo para
+      estas dos, la consistencia entre frames importa más acá). Contra lo
+      que anticipaba el riesgo documentado, la consistencia entre frames
+      salió sorprendentemente bien al pedir explícitamente una grilla 2x2
+      con "identical character design/proportions/colors/scale in every
+      frame" — no hizo falta el fallback de animar por código.
+- [x] `player-jump`: frame único separado (pose en el aire, rodillas
+      arriba, brazos arriba), mismo tamaño que los frames de walk.
+- [x] Tamaños subidos ~18% (jugador 54px→64px, enemigo 51px→60px) para que
+      se vean "un poco más grandes" como pidió el usuario.
+- [x] `BootScene`: `this.load.spritesheet` para `player-walk`/`enemy-walk`
+      (frameWidth/frameHeight) + `this.anims.create` para ambos ciclos
+      (`player-walk` frameRate 8, `enemy-walk` frameRate 6, ambos loop).
+- [x] `Player.ts`: nuevo método `updateAnimation` que decide entre 3 estados
+      por frame — en el aire (`body.blocked.down === false`) usa la imagen
+      suelta `player-jump`; moviéndose en el piso reproduce `player-walk`;
+      quieto vuelve a `player-walk` frame 0 (idle). Verificado inyectando
+      velocidad directamente vía consola del navegador (la automatización
+      de teclado del browser no sostiene una tecla apretada de forma
+      confiable) — se confirmó el cambio de textura y el frame avanzando.
+- [x] `Enemy.ts`: reproduce `enemy-walk` en loop desde el constructor (el
+      enemigo siempre está patrullando, no necesita estados).
+- [x] `door-ajar`: frame intermedio generado; `Door.unlock()` ahora hace
+      una transición de 2 pasos (`door-ajar` inmediato + un leve tween de
+      "pop" -> `door-open` después de 260ms) en vez de un cambio de textura
+      instantáneo. Verificado emitiendo el evento de switch directamente y
+      confirmando la secuencia de texturas con los tiempos esperados.
+- [x] Se borraron los assets/specs estáticos `player.png`/`enemy.png`
+      (reemplazados por los sprite sheets).
+
+## Fase 7 — Pendiente (no crítico)
+- [ ] La hoja de `enemy-walk` tiene frames bastante parecidos entre sí (el
+      cangrejo no muestra tanta diferencia de pose como el jugador) —
+      aceptable para un "shuffle" pero se podría pedir más contraste entre
+      frames si se quiere más notorio.
+- [ ] No existe mecánica de puerta que se vuelva a cerrar, así que solo se
+      animó la apertura (`door-ajar`→`door-open`). Si en el futuro se
+      agrega una mecánica de re-cerrado, reutilizar `door-ajar` como paso
+      intermedio también para ese sentido.
 
 ## Notas técnicas
 - Todas las capas de fondo son `Image`/`TileSprite` únicos estirados con

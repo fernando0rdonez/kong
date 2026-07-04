@@ -23,7 +23,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private onDeath: () => void;
 
   constructor(scene: Phaser.Scene, x: number, y: number, onDeath: () => void) {
-    super(scene, x, y, "player");
+    super(scene, x, y, "player-walk", 0);
     this.onDeath = onDeath;
 
     scene.add.existing(this);
@@ -83,6 +83,25 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (Phaser.Input.Keyboard.JustDown(controls.keyE)) {
       this.nearbySwitch?.activate();
+    }
+
+    this.updateAnimation(body);
+  }
+
+  private updateAnimation(body: Phaser.Physics.Arcade.Body): void {
+    const grounded = body.blocked.down;
+    const moving = Math.abs(body.velocity.x) > 10;
+
+    if (!grounded) {
+      if (this.texture.key !== "player-jump") {
+        this.anims.stop();
+        this.setTexture("player-jump");
+      }
+    } else if (moving) {
+      this.play("player-walk", true);
+    } else {
+      this.anims.stop();
+      this.setTexture("player-walk", 0);
     }
   }
 

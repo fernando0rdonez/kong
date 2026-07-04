@@ -30,6 +30,20 @@ export class Door extends Phaser.Physics.Arcade.Sprite {
   private unlock(): void {
     if (!this.locked) return;
     this.locked = false;
-    this.setTexture("door-open");
+
+    // Pequena secuencia de apertura en 2 pasos (destrabada -> abierta del
+    // todo) en vez de un cambio de textura instantaneo.
+    this.setTexture("door-ajar");
+    this.scene.tweens.add({
+      targets: this,
+      scaleX: this.scaleX * 1.06,
+      scaleY: this.scaleY * 1.03,
+      duration: 140,
+      yoyo: true,
+      ease: "Sine.easeOut",
+    });
+    this.scene.time.delayedCall(260, () => {
+      this.setTexture("door-open");
+    });
   }
 }
